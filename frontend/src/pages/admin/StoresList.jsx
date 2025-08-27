@@ -2,81 +2,72 @@ import React, { useEffect, useState } from "react";
 import api from "../../api/api";
 
 const StoresList = () => {
-  const [stores, setStores] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [storeData, setStoreData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const fetchStores = async () => {
+  const loadStores = async () => {
     try {
-      setLoading(true);
-      const res = await api.get("/admin/stores");
-      setStores(res.data);
-    } catch (err) {
-      console.error("Error fetching stores", err);
+      setIsLoading(true);
+      const { data } = await api.get("/admin/stores");
+      setStoreData(data);
+    } catch (error) {
+      console.error("Could not load stores:", error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchStores();
+    loadStores();
   }, []);
 
-  if (loading) return <div style={{ padding: "20px", fontSize: "18px" }}>Loading stores...</div>;
-  if (!stores.length) return <p style={{ padding: "20px", fontSize: "18px" }}>No stores found.</p>;
+  if (isLoading) {
+    return (
+      <div className="p-6 text-lg font-medium text-gray-600">Loading store records...</div>
+    );
+  }
+
+  if (storeData.length === 0) {
+    return (
+      <div className="p-6 text-lg font-medium text-gray-600">No stores available.</div>
+    );
+  }
 
   return (
-    <div style={{ padding: "24px" }}>
-      <h1 style={{ fontSize: "26px", fontWeight: "bold", marginBottom: "20px", color: "#2c3e50" }}>
-        Stores List
-      </h1>
-      <table
-        style={{
-          width: "100%",
-          borderCollapse: "collapse",
-          background: "#fff",
-          boxShadow: "0px 4px 12px rgba(0,0,0,0.1)",
-          borderRadius: "10px",
-          overflow: "hidden"
-        }}
-      >
-        <thead>
-          <tr style={{ background: "#f4f6f8", textAlign: "left" }}>
-            <th style={{ padding: "12px", borderBottom: "2px solid #e0e0e0" }}>ID</th>
-            <th style={{ padding: "12px", borderBottom: "2px solid #e0e0e0" }}>Name</th>
-            <th style={{ padding: "12px", borderBottom: "2px solid #e0e0e0" }}>Email</th>
-            <th style={{ padding: "12px", borderBottom: "2px solid #e0e0e0" }}>Address</th>
-            <th style={{ padding: "12px", borderBottom: "2px solid #e0e0e0" }}>Owner</th>
-            <th style={{ padding: "12px", borderBottom: "2px solid #e0e0e0" }}>Ratings</th>
-          </tr>
-        </thead>
-        <tbody>
-          {stores.map((s, index) => (
-            <tr
-              key={s.id}
-              style={{
-                background: index % 2 === 0 ? "#ffffff" : "#fafafa",
-                transition: "background 0.3s",
-                cursor: "pointer"
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "#f1f7ff")}
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.background = index % 2 === 0 ? "#ffffff" : "#fafafa")
-              }
-            >
-              <td style={{ padding: "12px", borderBottom: "1px solid #e0e0e0" }}>{s.id}</td>
-              <td style={{ padding: "12px", borderBottom: "1px solid #e0e0e0" }}>{s.name}</td>
-              <td style={{ padding: "12px", borderBottom: "1px solid #e0e0e0", color: "#2980b9" }}>
-                {s.email}
-              </td>
-              <td style={{ padding: "12px", borderBottom: "1px solid #e0e0e0" }}>{s.address}</td>
-              <td style={{ padding: "12px", borderBottom: "1px solid #e0e0e0" }}>{s.ownerName}</td>
-              <td style={{ padding: "12px", borderBottom: "1px solid #e0e0e0", fontWeight: "bold" }}>
-                ⭐ {s.ratingsCount}
-              </td>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">All Stores</h1>
+
+      <div className="overflow-x-auto shadow-md rounded-lg">
+        <table className="w-full border-collapse bg-white">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="px-4 py-3 text-left border-b">ID</th>
+              <th className="px-4 py-3 text-left border-b">Name</th>
+              <th className="px-4 py-3 text-left border-b">Email</th>
+              <th className="px-4 py-3 text-left border-b">Address</th>
+              <th className="px-4 py-3 text-left border-b">Owner</th>
+              <th className="px-4 py-3 text-left border-b">Ratings</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {storeData.map((store, idx) => (
+              <tr
+                key={store.id}
+                className={`transition-colors ${
+                  idx % 2 === 0 ? "bg-white" : "bg-gray-50"
+                } hover:bg-blue-50`}
+              >
+                <td className="px-4 py-3 border-b">{store.id}</td>
+                <td className="px-4 py-3 border-b font-medium">{store.name}</td>
+                <td className="px-4 py-3 border-b text-blue-600">{store.email}</td>
+                <td className="px-4 py-3 border-b">{store.address}</td>
+                <td className="px-4 py-3 border-b">{store.ownerName}</td>
+                <td className="px-4 py-3 border-b font-semibold">⭐ {store.ratingsCount}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

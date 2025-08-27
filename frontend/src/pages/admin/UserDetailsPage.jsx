@@ -1,149 +1,139 @@
-// src/pages/admin/UserDetailsPage.jsx
+// src/pages/admin/UserProfile.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../../api/api";
 
-const UserDetailsPage = () => {
+const UserProfile = () => {
   const { userId } = useParams();
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [details, setDetails] = useState(null);
+  const [isFetching, setIsFetching] = useState(true);
 
-  const fetchUser = async () => {
+  const getUserDetails = async () => {
     try {
-      const res = await api.get(`/admin/users/${userId}`);
-      setUser(res.data);
-    } catch (err) {
-      console.error("Error fetching user details", err);
+      const { data } = await api.get(`/admin/users/${userId}`);
+      setDetails(data);
+    } catch (error) {
+      console.error("Failed to load user:", error);
     } finally {
-      setLoading(false);
+      setIsFetching(false);
     }
   };
 
   useEffect(() => {
-    fetchUser();
+    getUserDetails();
   }, [userId]);
 
-  if (loading)
-    return <div style={{ padding: "20px", color: "#555", fontSize: "18px" }}>Loading user details...</div>;
-  if (!user)
-    return <div style={{ padding: "20px", color: "#e74c3c", fontSize: "18px" }}>User not found</div>;
+  if (isFetching) {
+    return (
+      <div className="p-6 text-gray-600 text-lg">Fetching user info...</div>
+    );
+  }
 
-  const cardStyle = {
-    background: "#fff",
-    boxShadow: "0px 4px 12px rgba(0,0,0,0.08)",
-    borderRadius: "10px",
-    padding: "20px",
-    marginBottom: "24px"
-  };
-
-  const tableStyle = {
-    width: "100%",
-    borderCollapse: "collapse",
-    borderRadius: "8px",
-    overflow: "hidden"
-  };
-
-  const thStyle = {
-    padding: "12px",
-    textAlign: "left",
-    borderBottom: "2px solid #e0e0e0",
-    background: "#f8f9fa",
-    color: "#444",
-    fontWeight: "600"
-  };
-
-  const tdStyle = {
-    padding: "12px",
-    borderBottom: "1px solid #e0e0e0",
-    color: "#555"
-  };
+  if (!details) {
+    return (
+      <div className="p-6 text-red-600 font-medium">⚠️ User not found</div>
+    );
+  }
 
   return (
-    <div style={{ padding: "24px", maxWidth: "1000px", margin: "0 auto", background: "#f9fafb", minHeight: "100vh" }}>
-      {/* Back Link */}
-      <Link to="/admin/users" style={{ color: "#1d4ed8", fontSize: "14px", fontWeight: 500, textDecoration: "none" }}>
-        ← Back to Users
+    <div className="p-6 max-w-5xl mx-auto bg-gray-50 min-h-screen">
+      {/* Back Navigation */}
+      <Link
+        to="/admin/users"
+        className="text-blue-600 hover:underline text-sm font-medium"
+      >
+        ← Back to User List
       </Link>
 
-      {/* Page Title */}
-      <h1 style={{ fontSize: "28px", fontWeight: "bold", color: "#2c3e50", margin: "16px 0" }}>
-        User Details
+      {/* Header */}
+      <h1 className="text-3xl font-bold text-gray-800 mt-4 mb-6">
+        User Information
       </h1>
 
-      {/* User Info */}
-      <div style={cardStyle}>
-        <p><strong>ID:</strong> {user.id}</p>
-        <p><strong>Name:</strong> {user.name}</p>
-        <p><strong>Email:</strong> {user.email}</p>
-        <p><strong>Address:</strong> {user.address}</p>
-        <p><strong>Role:</strong> {user.role}</p>
+      {/* User Info Card */}
+      <div className="bg-white shadow rounded-xl p-5 mb-6">
+        <p><span className="font-semibold">ID:</span> {details.id}</p>
+        <p><span className="font-semibold">Name:</span> {details.name}</p>
+        <p><span className="font-semibold">Email:</span> {details.email}</p>
+        <p><span className="font-semibold">Address:</span> {details.address}</p>
+        <p><span className="font-semibold">Role:</span> {details.role}</p>
       </div>
 
-      {/* Stores */}
-      <div style={cardStyle}>
-        <h2 style={{ fontSize: "20px", fontWeight: "600", marginBottom: "12px", color: "#2c3e50" }}>
-          Stores Owned
+      {/* Stores Owned */}
+      <div className="bg-white shadow rounded-xl p-5 mb-6">
+        <h2 className="text-xl font-semibold text-gray-700 mb-3">
+          Owned Stores
         </h2>
-        {user.stores?.length > 0 ? (
-          <table style={tableStyle}>
-            <thead>
-              <tr>
-                <th style={thStyle}>ID</th>
-                <th style={thStyle}>Name</th>
-                <th style={thStyle}>Address</th>
-              </tr>
-            </thead>
-            <tbody>
-              {user.stores.map((s, idx) => (
-                <tr
-                  key={s.id}
-                  style={{ background: idx % 2 === 0 ? "#ffffff" : "#fdfdfd" }}
-                >
-                  <td style={tdStyle}>{s.id}</td>
-                  <td style={tdStyle}>{s.name}</td>
-                  <td style={tdStyle}>{s.address}</td>
+        {details.stores?.length ? (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="px-4 py-2 text-left border-b">ID</th>
+                  <th className="px-4 py-2 text-left border-b">Name</th>
+                  <th className="px-4 py-2 text-left border-b">Address</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {details.stores.map((store, i) => (
+                  <tr
+                    key={store.id}
+                    className={`${
+                      i % 2 === 0 ? "bg-white" : "bg-gray-50"
+                    } hover:bg-blue-50 transition`}
+                  >
+                    <td className="px-4 py-2 border-b">{store.id}</td>
+                    <td className="px-4 py-2 border-b font-medium">{store.name}</td>
+                    <td className="px-4 py-2 border-b">{store.address}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : (
-          <p style={{ color: "#777" }}>No stores owned</p>
+          <p className="text-gray-500">No stores owned</p>
         )}
       </div>
 
       {/* Ratings */}
-      <div style={cardStyle}>
-        <h2 style={{ fontSize: "20px", fontWeight: "600", marginBottom: "12px", color: "#2c3e50" }}>
+      <div className="bg-white shadow rounded-xl p-5">
+        <h2 className="text-xl font-semibold text-gray-700 mb-3">
           Ratings Submitted
         </h2>
-        {user.ratings?.length > 0 ? (
-          <table style={tableStyle}>
-            <thead>
-              <tr>
-                <th style={thStyle}>ID</th>
-                <th style={thStyle}>Score</th>
-                <th style={thStyle}>Comment</th>
-              </tr>
-            </thead>
-            <tbody>
-              {user.ratings.map((r, idx) => (
-                <tr
-                  key={r.id}
-                  style={{ background: idx % 2 === 0 ? "#ffffff" : "#fdfdfd" }}
-                >
-                  <td style={tdStyle}>{r.id}</td>
-                  <td style={{ ...tdStyle, fontWeight: "600", color: "#f39c12" }}>⭐ {r.score}</td>
-                  <td style={tdStyle}>{r.comment}</td>
+        {details.ratings?.length ? (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="px-4 py-2 text-left border-b">ID</th>
+                  <th className="px-4 py-2 text-left border-b">Score</th>
+                  <th className="px-4 py-2 text-left border-b">Comment</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {details.ratings.map((rating, i) => (
+                  <tr
+                    key={rating.id}
+                    className={`${
+                      i % 2 === 0 ? "bg-white" : "bg-gray-50"
+                    } hover:bg-yellow-50 transition`}
+                  >
+                    <td className="px-4 py-2 border-b">{rating.id}</td>
+                    <td className="px-4 py-2 border-b font-semibold text-yellow-600">
+                      ⭐ {rating.score}
+                    </td>
+                    <td className="px-4 py-2 border-b">{rating.comment}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : (
-          <p style={{ color: "#777" }}>No ratings submitted</p>
+          <p className="text-gray-500">No ratings submitted</p>
         )}
       </div>
     </div>
   );
 };
 
-export default UserDetailsPage;
+export default UserProfile;

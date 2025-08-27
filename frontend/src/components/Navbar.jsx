@@ -17,14 +17,12 @@ const Navbar = () => {
       <div className="text-xl font-bold">⭐ Roxiler Ratings</div>
       
       <div className="flex gap-6 items-center">
-        {/* Role greeting */}
         {user && (
           <span className="mr-4 font-semibold">
             {user.role}: Hello {user.name}
           </span>
         )}
 
-        {/* ADMIN Links */}
         {user?.role === "ADMIN" && (
           <>
             <Link to="/admin" className="hover:text-yellow-400 flex items-center gap-1">
@@ -44,8 +42,6 @@ const Navbar = () => {
             </Link>
           </>
         )}
-
-        {/* OWNER Links */}
         {user?.role === "OWNER" && (
           <>
             <Link to="/owner/stores" className="hover:text-yellow-400 flex items-center gap-1">
@@ -57,7 +53,6 @@ const Navbar = () => {
           </>
         )}
 
-        {/* USER Links */}
         {user?.role === "USER" && (
           <>
             <Link to="/user/stores" className="hover:text-yellow-400 flex items-center gap-1">
@@ -69,7 +64,7 @@ const Navbar = () => {
           </>
         )}
 
-        {/* Logout Button */}
+
         {user && (
           <button
             onClick={handleLogout}

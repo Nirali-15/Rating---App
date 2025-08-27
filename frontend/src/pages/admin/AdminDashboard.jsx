@@ -1,100 +1,96 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import api from "../../api/api";
-import { Link, useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
-  const [metrics, setMetrics] = useState({
-    totalUsers: 0,
-    totalStores: 0,
-    totalRatings: 0,
-  });
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const [stats, setStats] = useState({ users: 0, stores: 0, ratings: 0 });
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchMetrics = async () => {
+    const loadDashboardData = async () => {
       try {
-        const res = await api.get("/admin/dashboard");
-        setMetrics(res.data);
-      } catch (err) {
-        console.error("Error fetching metrics", err);
+        const { data } = await api.get("/admin/dashboard");
+        setStats({
+          users: data.totalUsers,
+          stores: data.totalStores,
+          ratings: data.totalRatings,
+        });
+      } catch (error) {
+        console.error("Failed to fetch dashboard data:", error);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
-    fetchMetrics();
+
+    loadDashboardData();
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
+  const logoutHandler = () => {
+    localStorage.clear();
     navigate("/login");
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-gray-700 text-lg font-medium animate-pulse">
-          Loading metrics...
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-200">
+        <p className="text-gray-700 text-lg font-semibold animate-pulse">
+          Fetching dashboard info...
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-5xl mx-auto">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-10">
-          <h1 className="text-2xl font-semibold text-gray-800">
-            Admin Dashboard
-          </h1>
+    <div className="min-h-screen bg-gray-200 p-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Top Bar */}
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
           <button
-            onClick={handleLogout}
-            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md font-medium transition-colors"
+            onClick={logoutHandler}
+            className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg shadow transition"
           >
             Logout
           </button>
         </div>
 
-        {/* Metric Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+   
+        <div className="grid gap-6 sm:grid-cols-3">
           {/* Users */}
-          <div className="bg-white p-5 rounded-lg shadow border border-gray-200">
-            <h2 className="text-sm font-medium text-gray-600">Users</h2>
-            <p className="text-3xl font-bold text-gray-800 mt-2">
-              {metrics.totalUsers}
+          <div className="bg-white border border-gray-300 rounded-lg shadow-md p-6 hover:shadow-lg transition">
+            <h2 className="text-gray-500 font-medium text-sm">Total Users</h2>
+            <p className="text-4xl font-extrabold text-gray-900 mt-2">
+              {stats.users}
             </p>
             <Link
               to="/admin/users"
-              className="mt-4 inline-block text-sm text-blue-600 hover:underline"
+              className="mt-4 block text-blue-500 hover:text-blue-700 text-sm font-medium"
             >
-              Manage Users
+              View / Manage Users →
             </Link>
           </div>
 
-          {/* Stores */}
-          <div className="bg-white p-5 rounded-lg shadow border border-gray-200">
-            <h2 className="text-sm font-medium text-gray-600">Stores</h2>
-            <p className="text-3xl font-bold text-gray-800 mt-2">
-              {metrics.totalStores}
+          <div className="bg-white border border-gray-300 rounded-lg shadow-md p-6 hover:shadow-lg transition">
+            <h2 className="text-gray-500 font-medium text-sm">Total Stores</h2>
+            <p className="text-4xl font-extrabold text-gray-900 mt-2">
+              {stats.stores}
             </p>
             <Link
               to="/admin/stores"
-              className="mt-4 inline-block text-sm text-blue-600 hover:underline"
+              className="mt-4 block text-blue-500 hover:text-blue-700 text-sm font-medium"
             >
-              Manage Stores
+              View / Manage Stores →
             </Link>
           </div>
-
-          {/* Ratings */}
-          <div className="bg-white p-5 rounded-lg shadow border border-gray-200">
-            <h2 className="text-sm font-medium text-gray-600">Ratings</h2>
-            <p className="text-3xl font-bold text-gray-800 mt-2">
-              {metrics.totalRatings}
+{/* Ratings */}
+          <div className="bg-white border border-gray-300 rounded-lg shadow-md p-6 hover:shadow-lg transition">
+            <h2 className="text-gray-500 font-medium text-sm">Total Ratings</h2>
+            <p className="text-4xl font-extrabold text-gray-900 mt-2">
+              {stats.ratings}
             </p>
-            <span className="mt-4 inline-block text-sm text-gray-500">
-              (Read-only)
+            <span className="mt-4 block text-gray-400 text-sm">
+              (Read-only data)
             </span>
           </div>
         </div>
