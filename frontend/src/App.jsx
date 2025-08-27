@@ -16,7 +16,7 @@ import UpdatePassword from "./pages/UpdatePassword";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UsersPage from "./pages/admin/UsersPage";
 import StoresList from "./pages/admin/StoresList";
-import AddStore from "./pages/admin/AddStore";
+import AddStore from "./pages/admin/StoreAdd";
 import UserDetailsPage from "./pages/admin/UserDetailsPage";
 import CreateUserPage from "./pages/admin/CreateUserPage";
 
